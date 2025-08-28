@@ -1,0 +1,5 @@
+Alice 10 55
+Bob 20 40
+Charlie 15 65
+Diana 25 30
+Ethan 30 80

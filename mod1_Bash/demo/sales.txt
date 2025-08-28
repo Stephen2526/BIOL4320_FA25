@@ -1,0 +1,5 @@
+Apples 120
+Bananas 80
+Cherries 150
+Dates 200
+Elderberries 90

@@ -347,3 +347,262 @@ $ echo "First" ; echo "Second"
 
 Outputs both lines sequentially, no matter what happens in the first command.
 
+# `xargs`: Convert stdin to Arguments
+
+We talked about **standard input (stdin)** and **command-line arguments** being different concepts. Frequently, you want to convert standard input to arguments (often as part of chaining many `|` commands). `xargs` is a command that lets you do just that!
+
+---
+
+## Example
+
+```bash
+$ ls *.java | xargs javac
+```
+
+* `ls *.java` → outputs `.java` filenames to standard output
+* `|` → pipes this list to the next command as standard input
+* `javac` → needs filenames as arguments, not stdin
+* `xargs` → converts the stdin list into command-line arguments for `javac`
+
+This is shorthand for the longer process:
+
+1. `ls *.java > toCompile.txt`
+2. `xargs javac < toCompile.txt`
+3. `rm toCompile.txt`
+
+---
+
+# `find`: Recursively Search Directories
+
+`ls *.java` only shows files in the current directory. The `find` command searches within **subdirectories** as well.
+
+## Example
+
+```bash
+$ find -name "*.java"
+```
+
+Finds all `.java` files in the current directory **and all subdirectories**.
+
+You will often pair `find` with `xargs` to perform an operation on all matches:
+
+```bash
+$ find -name "*.java" | xargs javac
+```
+
+Compiles all Java files in the current directory and its subdirectories.
+
+---
+
+# `cut`: Simplify Complex Strings
+
+The `cut` command extracts specific **characters** or **fields** from text input.
+
+## Using `-c` (characters)
+
+```bash
+$ echo "abcdef" | cut -c2
+b
+
+$ echo "abcdef" | cut -c2-5
+bcde
+
+$ echo "abcdef" | cut -c2,1,4
+bad
+```
+
+## Using `-d` (delimiter) and `-f` (field)
+
+Split input into fields by a delimiter, then pick specific fields.
+
+Example with CSV:
+
+```bash
+$ echo "a,b,c,d,e,f" | cut -d, -f1
+a
+```
+
+# `awk`: Powerful text processing
+
+## Basic Concepts
+`awk` is a powerful text-processing command in Unix/Linux. It is especially useful for working with structured text files, such as CSV or log files. Think of it as a simple programming language that works line by line, splitting text into fields and letting you perform actions on them.
+
+
+* `awk` reads input **line by line**.
+* Each line is split into **fields** (by default, fields are separated by spaces or tabs).
+* Fields are accessed with `$1`, `$2`, `$3`, …
+
+  * `$1` = first field
+  * `$2` = second field
+  * `$0` = the whole line
+
+---
+
+## Examples
+
+### 1. Print a specific column
+
+```bash
+$ awk '{print $1}' data.txt
+```
+
+Prints the **first field** (column) of every line in `data.txt`.
+
+---
+
+### 2. Print multiple columns
+
+```bash
+$ awk '{print $1, $3}' data.txt
+```
+
+Prints the **first** and **third** fields from each line.
+
+---
+
+### 3. Use a different delimiter
+
+```bash
+$ awk -F, '{print $1, $2}' data.csv
+```
+
+`-F,` tells `awk` to use a comma as the field separator. This prints the first and second columns from a CSV file.
+
+---
+
+### 4. Conditional printing
+
+```bash
+$ awk '$3 > 50 {print $1, $3}' data.txt
+```
+
+Prints the **first** and **third** fields only if the third field is greater than 50.
+
+---
+
+### 5. Summing a column
+
+```bash
+$ awk '{sum += $2} END {print "Total:", sum}' sales.txt
+```
+
+Adds up all the values in the **second column** of `sales.txt` and prints the total.
+
+---
+
+
+# `grep`: Searching text patterns
+
+`grep` is used to search for text patterns inside files. It’s like “find” for text. By default, it prints out any line that matches your search.
+
+---
+
+## Basic Concepts
+
+* `grep` looks for patterns in text.
+* Patterns can be simple words or powerful **regular expressions**.
+* By default, it’s case-sensitive.
+
+---
+
+## Examples
+
+### 1. Search for a word
+
+```bash
+$ grep "Alice" data.txt
+```
+
+Finds all lines containing `Alice` in `data.txt`.
+
+### 2. Case-insensitive search
+
+```bash
+$ grep -i "bob" data.txt
+```
+
+Finds lines with `bob` or `Bob`, ignoring case.
+
+### 3. Show line numbers
+
+```bash
+$ grep -n "error" logfile.txt
+```
+
+Prints matching lines with their line numbers.
+
+### 4. Search recursively in a folder
+
+```bash
+$ grep -r "TODO" src/
+```
+
+Searches for `TODO` in all files under the `src/` directory.
+
+### 5. Show surrounding context
+
+```bash
+$ grep -i -A2 -B2 "error" logfile.txt
+```
+
+Shows 2 lines **after** (`-A2`) and **before** (`-B2`) each match.
+
+---
+
+# `sed`: Text editing
+
+`sed` stands for **Stream Editor**. It’s used to automatically edit text in a file or input stream. You can think of it as a “search and replace” tool on steroids.
+
+---
+
+## Basic Concepts
+
+* `sed` applies **editing commands** to text as it streams through.
+* The most common use is **find and replace**.
+* By default, results are printed to the screen; use `-i` for in-place edits.
+
+---
+
+## Examples
+
+### 1. Simple find and replace
+
+```bash
+$ sed 's/green/black/' veggies.txt
+```
+
+Replaces the first occurrence of `green` with `black` on each line.
+
+### 2. Replace globally (all matches per line)
+
+```bash
+$ sed 's/green/black/g' veggies.txt
+```
+
+Replaces all `green` words with `black`.
+
+### 3. In-place editing
+
+```bash
+$ sed -i 's/green/black/g' veggies.txt
+```
+
+Edits the file directly, changing all `green` to `black`.
+
+### 4. Delete lines
+
+```bash
+$ sed '/^#/d' fruits.txt
+```
+
+Deletes all lines starting with `#` (comments).
+
+### 5. Print a range of lines
+
+```bash
+$ sed -n '5,10p' veggies.txt
+```
+
+Prints only lines 5 through 10.
+
+---
